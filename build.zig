@@ -4,10 +4,7 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const maybe_registry = b.option([]const u8, "registry", "Path to the Vulkan registry");
-    if (maybe_registry == null) std.log.warn("no vk.xml path provided, using library's version (1.3.283)", .{});
-
-    const registry = maybe_registry orelse b.pathFromRoot("vk.xml");
+    const vulkan_registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml").getPath(b);
     const enable_validation = b.option(bool, "enable_validation", "Enable vulkan validation layers");
     const verbose = b.option(bool, "verbose", "Enable debug output");
 
@@ -16,7 +13,7 @@ pub fn build(b: *std.Build) void {
     build_options.addOption(bool, "verbose", verbose orelse false);
 
     const vkzig_dep = b.dependency("vulkan_zig", .{
-        .registry = registry,
+        .registry = vulkan_registry,
     });
 
     const kickstart = b.addModule("vk-kickstart", .{
